@@ -9,25 +9,38 @@
 <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
-  .viz-root {
+  /*
+    NOTE: these custom properties live on :root, not on .viz-root. They were
+    originally scoped to .viz-root, but body (which needs var(--surface-0)/
+    var(--text-primary) for the page background/base text color) is an
+    ANCESTOR of .viz-root in the DOM, not a descendant — custom properties
+    only cascade downward, so body could never see them. Every var() lookup
+    on body silently failed, body's color fell back through the inheritance
+    chain to the browser default (black), and since child panels still
+    resolved their own background colors correctly (they *are* descendants
+    of .viz-root), the result was black text on dark panels wherever an
+    element didn't set its own explicit color. Defining these on :root fixes
+    it for every element regardless of nesting.
+  */
+  :root {
     color-scheme: dark;
-    --surface-0:      #0a0a0b;   /* page plane */
-    --surface-1:      #131315;   /* panel */
-    --surface-2:      #1b1b1e;   /* recessed / chart box */
-    --surface-3:      #232326;   /* raised chip */
-    --f1-red:         #e10600;
-    --f1-red-dim:     #9c0700;
-    --f1-red-glow:    rgba(225,6,0,0.35);
-    --silver:         #e8e8ea;
-    --silver-dim:     #9a9aa0;
-    --flag-green:     #17c47a;
+    --surface-0:      #000000;   /* page plane — true black */
+    --surface-1:      #0c0c0d;   /* panel */
+    --surface-2:      #161618;   /* recessed / chart box */
+    --surface-3:      #202023;   /* raised chip */
+    --f1-red:         #ff1a1a;
+    --f1-red-dim:     #ff5c5c;
+    --f1-red-glow:    rgba(255,26,26,0.35);
+    --silver:         #eef0f2;
+    --silver-dim:     #b7b8bd;
+    --flag-green:     #22d98a;
     --flag-yellow:    #ffd400;
-    --text-primary:   #f5f5f4;
-    --text-secondary: #b3b2ae;
-    --text-muted:     #77767a;
-    --gridline:       #2a2a2d;
-    --border:         rgba(255,255,255,0.08);
-    --border-red:     rgba(225,6,0,0.35);
+    --text-primary:   #ffffff;
+    --text-secondary: #d3d2ce;
+    --text-muted:     #9c9ba1;
+    --gridline:       #303033;
+    --border:         rgba(255,255,255,0.12);
+    --border-red:     rgba(255,26,26,0.45);
   }
 
   * { box-sizing: border-box; }
@@ -39,7 +52,9 @@
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
     font-variant-numeric: proportional-nums;
   }
+  .viz-root { display: block; }
   .display { font-family: "Titillium Web", system-ui, sans-serif; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
 
   .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 90px; }
 
@@ -221,8 +236,8 @@
     display: inline-block; padding: 2px 9px; border-radius: 999px;
     font-size: 0.7rem; font-weight: 700; font-family: "Titillium Web", system-ui, sans-serif;
   }
-  .source-pill.bccc { background: rgba(225,6,0,0.15); color: var(--f1-red); }
-  .source-pill.cic  { background: rgba(232,232,234,0.14); color: var(--silver); }
+  .source-pill.bccc { background: var(--f1-red); color: #14090a; }
+  .source-pill.cic  { background: var(--silver); color: #14090a; }
 
   /* ---- charts ---- */
   .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
@@ -263,11 +278,11 @@
     font-size: 0.68rem; font-weight: 900; text-transform: uppercase;
     letter-spacing: 0.04em; padding: 4px 10px; border-radius: 3px; margin-top: 1px;
   }
-  .finding .tag.good { background: rgba(23,196,122,0.16); color: var(--flag-green); }
-  .finding .tag.neutral { background: rgba(232,232,234,0.14); color: var(--silver); }
-  .finding .tag.mixed { background: rgba(255,212,0,0.16); color: var(--flag-yellow); }
+  .finding .tag.good { background: var(--flag-green); color: #06180f; }
+  .finding .tag.neutral { background: var(--silver); color: #14090a; }
+  .finding .tag.mixed { background: var(--flag-yellow); color: #241c00; }
   .finding p { margin: 0; font-size: 0.92rem; line-height: 1.6; color: var(--text-primary); }
-  .finding p code { background: var(--surface-3); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; color: var(--f1-red); }
+  .finding p code { background: var(--surface-3); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; color: var(--f1-red-dim); }
 
   footer.page-foot {
     text-align: center; color: var(--text-muted); font-size: 0.78rem;
