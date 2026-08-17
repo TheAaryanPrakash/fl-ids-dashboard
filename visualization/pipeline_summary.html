@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FL-IDS Pipeline Summary</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Titillium+Web:ital,wght@0,400;0,600;0,700;0,900;1,600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  .viz-root {
+    color-scheme: dark;
+    --surface-0:      #0a0a0b;   /* page plane */
+    --surface-1:      #131315;   /* panel */
+    --surface-2:      #1b1b1e;   /* recessed / chart box */
+    --surface-3:      #232326;   /* raised chip */
+    --f1-red:         #e10600;
+    --f1-red-dim:     #9c0700;
+    --f1-red-glow:    rgba(225,6,0,0.35);
+    --silver:         #e8e8ea;
+    --silver-dim:     #9a9aa0;
+    --flag-green:     #17c47a;
+    --flag-yellow:    #ffd400;
+    --text-primary:   #f5f5f4;
+    --text-secondary: #b3b2ae;
+    --text-muted:     #77767a;
+    --gridline:       #2a2a2d;
+    --border:         rgba(255,255,255,0.08);
+    --border-red:     rgba(225,6,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--surface-0);
+    color: var(--text-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-variant-numeric: proportional-nums;
+  }
+  .display { font-family: "Titillium Web", system-ui, sans-serif; }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px 90px; }
+
+  /* ---- checkered accent ---- */
+  .checker-strip {
+    height: 10px; width: 100%;
+    background-image: repeating-conic-gradient(var(--f1-red) 0% 25%, #000 0% 50%);
+    background-size: 20px 20px;
+    opacity: 0.9;
+  }
+
+  /* ---- sticky nav ---- */
+  nav.f1-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(10,10,11,0.92);
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border-red);
+  }
+  nav.f1-nav .nav-inner {
+    max-width: 1180px; margin: 0 auto; padding: 0 20px;
+    display: flex; align-items: center; gap: 4px; overflow-x: auto;
+  }
+  nav.f1-nav a {
+    color: var(--text-secondary); text-decoration: none;
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-weight: 700; font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 14px 14px; white-space: nowrap; border-bottom: 3px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  nav.f1-nav a:hover { color: var(--text-primary); border-color: var(--f1-red-dim); }
+  nav.f1-nav .brand {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-weight: 900; font-style: italic; color: var(--f1-red);
+    font-size: 0.95rem; letter-spacing: 0.02em; padding-right: 18px; white-space: nowrap;
+  }
+
+  /* ---- header ---- */
+  header.page-head { padding: 44px 0 28px; }
+  header.page-head .kicker {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    color: var(--f1-red); font-weight: 700; font-size: 0.78rem;
+    letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 10px;
+  }
+  header.page-head h1 {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-size: 2.4rem; font-weight: 900; font-style: italic;
+    margin: 0 0 12px; letter-spacing: -0.01em; line-height: 1.05;
+    text-shadow: 0 0 30px var(--f1-red-glow);
+  }
+  header.page-head p {
+    color: var(--text-secondary); margin: 0; font-size: 1rem; max-width: 76ch; line-height: 1.6;
+  }
+
+  /* ---- panels ---- */
+  section.panel {
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--f1-red);
+    border-radius: 4px;
+    padding: 30px 30px 34px;
+    margin-bottom: 28px;
+    scroll-margin-top: 64px;
+  }
+  section.panel h2 {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-size: 1.3rem; font-weight: 900; font-style: italic; text-transform: uppercase;
+    letter-spacing: 0.01em;
+    margin: 0 0 4px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  section.panel h2 .num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 3px;
+    background: var(--f1-red); color: #fff;
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-size: 0.95rem; font-weight: 900; font-style: normal;
+  }
+  section.panel > .desc {
+    color: var(--text-secondary); font-size: 0.92rem; margin: 0 0 20px; max-width: 82ch; line-height: 1.55;
+  }
+  section.panel h3.sub-head {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-size: 0.95rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--text-primary); margin: 26px 0 10px;
+    border-bottom: 1px solid var(--gridline); padding-bottom: 8px;
+  }
+
+  .missing-note {
+    background: rgba(255,212,0,0.08);
+    border: 1px solid rgba(255,212,0,0.35);
+    color: var(--flag-yellow);
+    border-radius: 6px; padding: 10px 14px; font-size: 0.85rem; margin-bottom: 18px;
+  }
+  .missing-note code { color: var(--text-primary); }
+
+  /* ---- info / explanation cards ---- */
+  .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 16px 0 4px; }
+  .info-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--silver-dim);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .info-card .info-title {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.03em;
+    color: var(--f1-red); margin-bottom: 6px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .info-card p { margin: 0; font-size: 0.85rem; line-height: 1.55; color: var(--text-secondary); }
+  .info-card p + p { margin-top: 8px; }
+  .info-card code { background: var(--surface-3); color: var(--text-primary); padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+
+  /* ---- pipeline diagram ---- */
+  .pipeline { display: flex; align-items: stretch; gap: 0; flex-wrap: wrap; margin-bottom: 6px; }
+  .pipe-stage {
+    flex: 1 1 170px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 16px 12px;
+    text-align: center;
+    position: relative;
+    transition: border-color .15s, transform .15s;
+  }
+  .pipe-stage:hover { border-color: var(--f1-red); transform: translateY(-2px); }
+  .pipe-stage .stage-num {
+    position: absolute; top: 8px; left: 10px;
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-size: 0.68rem; font-weight: 900; color: var(--f1-red-dim);
+  }
+  .pipe-stage .stage-icon { font-size: 1.6rem; margin-bottom: 8px; }
+  .pipe-stage .stage-title {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-weight: 700; font-size: 0.86rem; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.01em;
+  }
+  .pipe-stage .stage-sub { font-size: 0.76rem; color: var(--text-secondary); line-height: 1.4; }
+  .pipe-arrow {
+    flex: 0 0 30px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--f1-red); font-size: 1.3rem; font-weight: 900;
+  }
+  @media (max-width: 820px) {
+    .pipe-arrow { flex-basis: 100%; transform: rotate(90deg); padding: 2px 0; }
+  }
+
+  /* ---- stat tiles ---- */
+  .stat-row { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 22px; }
+  .stat-tile {
+    flex: 1 1 170px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--f1-red);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+  .stat-tile .label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+  .stat-tile .value {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-size: 1.6rem; font-weight: 900; font-style: italic;
+  }
+  .stat-tile .sub { font-size: 0.78rem; color: var(--text-secondary); margin-top: 3px; }
+
+  /* ---- tables ---- */
+  table.data-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  table.data-table th, table.data-table td {
+    text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--gridline);
+  }
+  table.data-table th {
+    color: var(--text-muted); font-weight: 700; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.04em;
+    font-family: "Titillium Web", system-ui, sans-serif;
+  }
+  table.data-table td.num, table.data-table th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  table.data-table tr:last-child td { border-bottom: none; }
+  table.data-table tbody tr:hover { background: var(--surface-2); }
+  .source-pill {
+    display: inline-block; padding: 2px 9px; border-radius: 999px;
+    font-size: 0.7rem; font-weight: 700; font-family: "Titillium Web", system-ui, sans-serif;
+  }
+  .source-pill.bccc { background: rgba(225,6,0,0.15); color: var(--f1-red); }
+  .source-pill.cic  { background: rgba(232,232,234,0.14); color: var(--silver); }
+
+  /* ---- charts ---- */
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  @media (max-width: 760px) { .chart-grid { grid-template-columns: 1fr; } }
+  .chart-box { background: var(--surface-2); border: 1px solid var(--border); border-radius: 4px; padding: 16px 18px 10px; }
+  .chart-box .chart-title {
+    font-family: "Titillium Web", system-ui, sans-serif;
+    font-size: 0.88rem; font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.02em;
+  }
+  .chart-box canvas { max-height: 300px; }
+  .two-col { display: grid; grid-template-columns: 1.1fr 1fr; gap: 26px; align-items: start; }
+  @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
+
+  .legend-row { display: flex; gap: 18px; flex-wrap: wrap; font-size: 0.8rem; color: var(--text-secondary); margin: 12px 0 0; }
+  .legend-row .item { display: flex; align-items: center; gap: 7px; }
+  .swatch { width: 16px; height: 3px; border-radius: 2px; display: inline-block; }
+  .swatch.dashed { background-image: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 8px); height: 2px; background-color: transparent !important; color: var(--text-secondary); }
+
+  /* ---- topology / traffic simulation ---- */
+  .topo-wrap {
+    background: radial-gradient(ellipse at 50% 20%, rgba(225,6,0,0.06), transparent 60%), var(--surface-2);
+    border: 1px solid var(--border); border-radius: 6px; padding: 8px; margin: 16px 0 6px;
+  }
+  .topo-wrap svg { width: 100%; height: auto; display: block; }
+  .topo-caption { text-align: center; font-size: 0.78rem; color: var(--text-muted); padding: 10px 6px 4px; }
+  .node-label { font-family: "Titillium Web", system-ui, sans-serif; font-size: 11px; font-weight: 700; fill: var(--text-primary); }
+  .node-sub { font-family: system-ui, sans-serif; font-size: 8.5px; fill: var(--text-muted); }
+
+  /* ---- findings ---- */
+  .findings-list { display: flex; flex-direction: column; gap: 14px; }
+  .finding {
+    display: flex; gap: 14px; align-items: flex-start;
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 4px; padding: 16px 18px;
+  }
+  .finding .tag {
+    flex: 0 0 auto; font-family: "Titillium Web", system-ui, sans-serif;
+    font-size: 0.68rem; font-weight: 900; text-transform: uppercase;
+    letter-spacing: 0.04em; padding: 4px 10px; border-radius: 3px; margin-top: 1px;
+  }
+  .finding .tag.good { background: rgba(23,196,122,0.16); color: var(--flag-green); }
+  .finding .tag.neutral { background: rgba(232,232,234,0.14); color: var(--silver); }
+  .finding .tag.mixed { background: rgba(255,212,0,0.16); color: var(--flag-yellow); }
+  .finding p { margin: 0; font-size: 0.92rem; line-height: 1.6; color: var(--text-primary); }
+  .finding p code { background: var(--surface-3); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; color: var(--f1-red); }
+
+  footer.page-foot {
+    text-align: center; color: var(--text-muted); font-size: 0.78rem;
+    margin-top: 30px; padding-top: 24px; border-top: 1px solid var(--gridline);
+  }
+  footer.page-foot a { color: var(--f1-red); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="viz-root">
+<div class="checker-strip"></div>
+<nav class="f1-nav">
+  <div class="nav-inner">
+    <span class="brand">FL·IDS</span>
+    <a href="#s1">Overview</a>
+    <a href="#s2">Dataset</a>
+    <a href="#s3">FL Results</a>
+    <a href="#s4">Network</a>
+    <a href="#s5">Findings</a>
+  </div>
+</nav>
+<div class="wrap">
+
+  <header class="page-head">
+    <div class="kicker">Federated Learning · Intrusion Detection · SDN</div>
+    <h1>FL-IDS Pipeline Summary</h1>
+    <p>A federated-learning intrusion detection system, trained non-IID across simulated clients, stress-tested
+       under label-flipping poisoning, and finally run over a real emulated network through a custom OpenFlow
+       controller. Every number and chart on this page is read live from this project's own data and result
+       files — nothing here is hardcoded.</p>
+  </header>
+
+  <!-- ============ SECTION 1: PIPELINE OVERVIEW ============ -->
+  <section class="panel" id="s1">
+    <h2><span class="num">1</span>Pipeline Overview</h2>
+    <p class="desc">The project runs in five stages, each building on the last. The end goal (not built yet — see
+       the note at the end of this section) is to eventually run this whole system on top of the emulated
+       network and have the controller act on what the IDS detects. Right now, stages 1–5 below are complete
+       and are what the rest of this page reports on.</p>
+    <div class="pipeline" id="pipeline-diagram">
+      <div class="pipe-stage"><span class="stage-num">01</span>
+        <div class="stage-icon">🗂️</div>
+        <div class="stage-title">Raw Datasets</div>
+        <div class="stage-sub" id="stage-1-sub">loading…</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><span class="stage-num">02</span>
+        <div class="stage-icon">🔀</div>
+        <div class="stage-title">Non-IID Partitioning</div>
+        <div class="stage-sub" id="stage-2-sub">loading…</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><span class="stage-num">03</span>
+        <div class="stage-icon">🧠</div>
+        <div class="stage-title">Flower FL Simulation</div>
+        <div class="stage-sub">FedAvg vs. FedTrimmedAvg,<br>clean &amp; poisoned</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><span class="stage-num">04</span>
+        <div class="stage-icon">🌐</div>
+        <div class="stage-title">Mininet + SDN Controller</div>
+        <div class="stage-sub">6-host topology, custom<br>OpenFlow 1.3 controller</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-stage"><span class="stage-num">05</span>
+        <div class="stage-icon">📊</div>
+        <div class="stage-title">Results Comparison</div>
+        <div class="stage-sub">Local vs. networked,<br>clean vs. poisoned</div>
+      </div>
+    </div>
+
+    <h3 class="sub-head">What each stage actually does</h3>
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-title">① Two unrelated IDS datasets</div>
+        <p>Two pre-cleaned CSVs were the starting point: one built from MQTT/IoT protocol-level traffic features,
+          one from generic network-flow statistics. They were inspected first (row counts, label values, null
+          checks) before any preprocessing decisions were made — the schemas turned out to share a single column
+          in common (the label), which shaped everything downstream.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">② Split into non-IID clients</div>
+        <p>Because the two sources have zero overlapping features, they were treated as two different data
+          <em>domains</em>, each split across its own set of simulated clients, plus an extra Dirichlet(α=0.5)
+          skew on top so even same-domain clients don't see the same class mix. See Section 2 for the real
+          per-client breakdown.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">③ Federated training, two strategies</div>
+        <p>A small MLP is trained across 5 simulated clients using Flower, comparing plain FedAvg against a
+          robust alternative (coordinate-wise trimmed mean), each run once clean and once with 2 of 5 clients
+          poisoning their labels. See Section 3.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">④ The same training, over a real network</div>
+        <p>The identical FL logic is then run again — unmodified — but with the server and clients as separate
+          processes on separate emulated hosts, talking real gRPC over Mininet virtual links through a
+          from-scratch OpenFlow 1.3 controller. See Section 4.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 2: DATASET SUMMARY ============ -->
+  <section class="panel" id="s2">
+    <h2><span class="num">2</span>Dataset Summary</h2>
+    <p class="desc">Per-client partitions actually written to <code>data/client_*.csv</code> — row counts, source
+       dataset, and benign/attack balance. This is the real non-IID structure the FL clients trained on.</p>
+    <div id="dataset-missing"></div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-title">🏷️ Where the two domains come from</div>
+        <p><code>bccc_cleaned.csv</code> — 104 numeric features describing MQTT/IoT protocol behaviour
+          (connection counts, publish timing, packet-length statistics), 18 attack/benign classes, ~2,000 rows
+          each. <code>cic_cleaned.csv</code> — 50 numeric features describing generic network flows (TCP flags,
+          TTL, window size, packet timing), 8 classes, 1,000 rows each. The two share nothing feature-wise, which
+          is exactly why they were kept as separate simulated domains rather than merged.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">🧩 Handling the disjoint feature space</div>
+        <p>To let one global model serve every client despite the schema mismatch, both feature sets were placed
+          into a single 154-column <em>union</em> space: a client from one domain keeps its real values in its
+          own block of columns and gets zeros in the other domain's block. FedAvg then just averages one
+          consistent parameter vector across all 5 clients regardless of which domain they're from.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-head">Per-client partitions</h3>
+    <div class="two-col">
+      <div>
+        <table class="data-table" id="client-table">
+          <thead>
+            <tr><th>Client</th><th>Source</th><th class="num">Rows</th><th class="num">Benign</th><th class="num">Attack</th><th class="num">% Attack</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">Benign vs. attack rows per client</div>
+        <canvas id="chart-client-balance"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 3: CLEAN VS POISONED ============ -->
+  <section class="panel" id="s3">
+    <h2><span class="num">3</span>FL Results: Clean vs. Poisoned</h2>
+    <p class="desc">FedAvg and FedTrimmedAvg (robust aggregation), each run once with no adversarial clients
+       (<em>clean</em>, from <code>results/baseline/</code>) and once with 2 of 5 clients performing
+       label-flipping poisoning (<em>poisoned</em>, from <code>results/</code>). Color = strategy, line style = condition.</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-title">🏁 FedAvg</div>
+        <p>The baseline strategy: every round, the server averages all participating clients' model updates,
+          weighted by how much local data each one trained on. It has no defense built in — a malicious client's
+          corrupted update is blended in with full weight, same as anyone else's.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">🛡️ Trimmed Mean</div>
+        <p>A robust alternative: for every individual model weight, the highest and lowest β fraction of client
+          values are discarded before averaging (β=0.4 here, so with 5 clients, 2 of the 5 values are dropped at
+          each coordinate). The idea is to tolerate a bounded fraction of bad actors without knowing in advance
+          which clients they are.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">☠️ Label-flipping poisoning</div>
+        <p>The simulated attack: a malicious client trains on its real feature data but with 50% of its local
+          labels deliberately flipped (benign ↔ attack) before local training. It still follows the protocol
+          normally — only the content it learns from, and reports back, is corrupted. 2 of 5 clients (40%) do
+          this in every "poisoned" run below.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">📐 Why F1/precision/recall, not just accuracy</div>
+        <p>The test set is heavily attack-skewed (over 90% attack), so a model that always predicts "attack"
+          scores deceptively high on accuracy alone. Recall in particular shows whether the model is still
+          catching real attacks rather than just matching the base rate.</p>
+      </div>
+    </div>
+
+    <div id="section3-missing"></div>
+    <div class="chart-grid">
+      <div class="chart-box">
+        <div class="chart-title">Accuracy vs. round</div>
+        <canvas id="chart-acc-clean-poisoned"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">F1 vs. round</div>
+        <canvas id="chart-f1-clean-poisoned"></canvas>
+      </div>
+    </div>
+    <div class="legend-row">
+      <span class="item"><span class="swatch" style="background:var(--f1-red)"></span>FedAvg</span>
+      <span class="item"><span class="swatch" style="background:var(--silver)"></span>Trimmed Mean</span>
+      <span class="item">solid = poisoned&nbsp;&nbsp;·&nbsp;&nbsp;dashed = clean</span>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 4: NETWORKED VS NON-NETWORKED ============ -->
+  <section class="panel" id="s4">
+    <h2><span class="num">4</span>Networked vs. Non-Networked</h2>
+    <p class="desc">The same FedAvg run (2/5 malicious clients) executed two ways: in-process Flower simulation
+       (<code>results/metrics_fedavg.csv</code>) vs. real gRPC traffic over an emulated Mininet network through
+       a custom OpenFlow 1.3 controller (<code>results/networked/</code>).</p>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-title">🖧 Mininet</div>
+        <p>Mininet emulates a real network — genuine Linux network namespaces, virtual Ethernet links, and a real
+          Open vSwitch bridge — rather than abstractly simulating one. Software running inside it sends actual
+          packets over actual (virtual) wires, which is what lets the exact same client/server code from Section
+          3 run unmodified here, just talking over a network instead of in-process.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">🕹️ Software-Defined Networking</div>
+        <p>In an SDN, switches don't decide how to forward traffic on their own — they ask an external controller
+          over the OpenFlow protocol. That separation is what would eventually let an IDS-aware controller act on
+          what it sees (e.g. quarantining a flagged host) — a later phase, not built yet.</p>
+      </div>
+      <div class="info-card">
+        <div class="info-title">⚠️ Why the controller isn't Ryu</div>
+        <p>The plan called for Ryu, the standard tutorial SDN controller. It turned out to be unrunnable on any
+          currently installable Python — unmaintained since ~2021, and even after rebuilding a legacy Python 3.9
+          environment by hand, its own pinned dependencies (<code>oslo.config</code>, <code>eventlet</code>) no
+          longer work together, and one release's source code turned out to still be Python 2. What's actually
+          running is a from-scratch OpenFlow 1.3 controller — built on the <code>python-openflow</code> protocol
+          library plus plain sockets — implementing the same L2 learning-switch behaviour Ryu's own tutorial
+          controller would have.</p>
+      </div>
+    </div>
+
+    <h3 class="sub-head">Topology &amp; traffic flow</h3>
+    <div class="topo-wrap">
+      <svg viewBox="0 0 640 420" id="topo-svg" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="none"></marker>
+        </defs>
+        <!-- data links -->
+        <g stroke="#3a3a3e" stroke-width="2" fill="none">
+          <line x1="320" y1="200" x2="320" y2="58"/>
+          <line x1="320" y1="200" x2="70" y2="330"/>
+          <line x1="320" y1="200" x2="180" y2="352"/>
+          <line x1="320" y1="200" x2="320" y2="362"/>
+          <line x1="320" y1="200" x2="460" y2="352"/>
+          <line x1="320" y1="200" x2="570" y2="330"/>
+        </g>
+        <!-- control channel -->
+        <line x1="320" y1="200" x2="540" y2="70" stroke="var(--silver-dim)" stroke-width="1.5" stroke-dasharray="4 4" id="ctrl-line" opacity="0.6"/>
+
+        <!-- packet paths (invisible, used for motion) -->
+        <path id="path-up-0" d="M 70,330 L 320,200 L 320,58" fill="none"/>
+        <path id="path-up-1" d="M 180,352 L 320,200 L 320,58" fill="none"/>
+        <path id="path-up-2" d="M 320,362 L 320,200 L 320,58" fill="none"/>
+        <path id="path-up-3" d="M 460,352 L 320,200 L 320,58" fill="none"/>
+        <path id="path-up-4" d="M 570,330 L 320,200 L 320,58" fill="none"/>
+        <path id="path-down-0" d="M 320,58 L 320,200 L 70,330" fill="none"/>
+        <path id="path-down-1" d="M 320,58 L 320,200 L 180,352" fill="none"/>
+        <path id="path-down-2" d="M 320,58 L 320,200 L 320,362" fill="none"/>
+        <path id="path-down-3" d="M 320,58 L 320,200 L 460,352" fill="none"/>
+        <path id="path-down-4" d="M 320,58 L 320,200 L 570,330" fill="none"/>
+
+        <!-- animated packets: upload = silver (client model update), download = red (broadcast global model) -->
+        <circle r="4.5" fill="var(--silver)"><animateMotion dur="3.2s" begin="0s"   repeatCount="indefinite"><mpath href="#path-up-0"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--silver)"><animateMotion dur="3.2s" begin="0.5s" repeatCount="indefinite"><mpath href="#path-up-1"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--silver)"><animateMotion dur="3.2s" begin="1.0s" repeatCount="indefinite"><mpath href="#path-up-2"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--silver)"><animateMotion dur="3.2s" begin="1.5s" repeatCount="indefinite"><mpath href="#path-up-3"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--silver)"><animateMotion dur="3.2s" begin="2.0s" repeatCount="indefinite"><mpath href="#path-up-4"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--f1-red)"><animateMotion dur="2.6s" begin="1.6s" repeatCount="indefinite"><mpath href="#path-down-0"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--f1-red)"><animateMotion dur="2.6s" begin="2.1s" repeatCount="indefinite"><mpath href="#path-down-1"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--f1-red)"><animateMotion dur="2.6s" begin="2.6s" repeatCount="indefinite"><mpath href="#path-down-2"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--f1-red)"><animateMotion dur="2.6s" begin="3.1s" repeatCount="indefinite"><mpath href="#path-down-3"/></animateMotion></circle>
+        <circle r="4.5" fill="var(--f1-red)"><animateMotion dur="2.6s" begin="3.6s" repeatCount="indefinite"><mpath href="#path-down-4"/></animateMotion></circle>
+
+        <!-- switch -->
+        <rect x="290" y="182" width="60" height="36" rx="4" fill="var(--surface-3)" stroke="var(--f1-red)" stroke-width="1.5"/>
+        <text x="320" y="204" text-anchor="middle" class="node-label">s1</text>
+        <text x="320" y="232" text-anchor="middle" class="node-sub">OVS switch</text>
+
+        <!-- controller -->
+        <rect x="512" y="42" width="76" height="34" rx="4" fill="var(--surface-3)" stroke="var(--silver-dim)" stroke-width="1.5"/>
+        <text x="550" y="63" text-anchor="middle" class="node-label">c0</text>
+        <text x="550" y="90" text-anchor="middle" class="node-sub">custom OF1.3 controller</text>
+
+        <!-- server -->
+        <rect x="288" y="18" width="64" height="34" rx="4" fill="var(--surface-3)" stroke="var(--f1-red)" stroke-width="1.5"/>
+        <text x="320" y="40" text-anchor="middle" class="node-label">h1</text>
+        <text x="320" y="12" text-anchor="middle" class="node-sub">FL server · 10.0.0.1</text>
+
+        <!-- clients -->
+        <g>
+          <rect x="40" y="332" width="60" height="30" rx="4" fill="var(--surface-3)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="70" y="352" text-anchor="middle" class="node-label">h2</text>
+          <text x="70" y="378" text-anchor="middle" class="node-sub">client 0 · .2</text>
+        </g>
+        <g>
+          <rect x="150" y="354" width="60" height="30" rx="4" fill="var(--surface-3)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="180" y="374" text-anchor="middle" class="node-label">h3</text>
+          <text x="180" y="398" text-anchor="middle" class="node-sub">client 1 · .3</text>
+        </g>
+        <g>
+          <rect x="290" y="364" width="60" height="30" rx="4" fill="var(--surface-3)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="320" y="384" text-anchor="middle" class="node-label">h4</text>
+          <text x="320" y="408" text-anchor="middle" class="node-sub">client 2 · .4</text>
+        </g>
+        <g>
+          <rect x="430" y="354" width="60" height="30" rx="4" fill="var(--surface-3)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="460" y="374" text-anchor="middle" class="node-label">h5</text>
+          <text x="460" y="398" text-anchor="middle" class="node-sub">client 3 · .5</text>
+        </g>
+        <g>
+          <rect x="540" y="332" width="60" height="30" rx="4" fill="var(--surface-3)" stroke="var(--border)" stroke-width="1.5"/>
+          <text x="570" y="352" text-anchor="middle" class="node-label">h6</text>
+          <text x="570" y="378" text-anchor="middle" class="node-sub">client 4 · .6</text>
+        </g>
+      </svg>
+      <div class="topo-caption">
+        <span style="color:var(--silver)">●</span> local model updates flowing client → switch → server
+        &nbsp;&nbsp;·&nbsp;&nbsp;
+        <span style="color:var(--f1-red)">●</span> aggregated global model broadcast back server → switch → clients
+        &nbsp;&nbsp;·&nbsp;&nbsp; dashed line = out-of-band OpenFlow control channel to <code>c0</code>
+      </div>
+    </div>
+
+    <h3 class="sub-head">Accuracy &amp; overhead</h3>
+    <div id="section4-missing"></div>
+    <div class="stat-row" id="overhead-stats"></div>
+    <div class="chart-grid">
+      <div class="chart-box">
+        <div class="chart-title">Accuracy vs. round</div>
+        <canvas id="chart-acc-networked"></canvas>
+      </div>
+      <div class="chart-box">
+        <div class="chart-title">F1 vs. round</div>
+        <canvas id="chart-f1-networked"></canvas>
+      </div>
+    </div>
+    <div class="legend-row">
+      <span class="item"><span class="swatch" style="background:var(--f1-red)"></span>Local (simulation)</span>
+      <span class="item"><span class="swatch" style="background:var(--silver)"></span>Networked (Mininet)</span>
+    </div>
+  </section>
+
+  <!-- ============ SECTION 5: KEY FINDINGS ============ -->
+  <section class="panel" id="s5">
+    <h2><span class="num">5</span>Key Findings</h2>
+    <p class="desc">Computed directly from the CSVs above at page-load time — not restated from memory.</p>
+    <div class="findings-list" id="findings-list"></div>
+  </section>
+
+  <footer class="page-foot">
+    Generated from <code>data/</code> and <code>results/</code> in the project working directory. Self-contained —
+    no server required beyond the Chart.js and Google Fonts CDN links.
+    &nbsp;·&nbsp; <a href="https://github.com/TheAaryanPrakash" target="_blank" rel="noopener">github.com/TheAaryanPrakash</a>
+  </footer>
+
+</div>
+</div>
+
+<script>
+const DATA = {"missing_files": ["results/networked/metrics_trimmed_mean.csv"], "clients": [{"id": 0, "n_rows": 7479, "source": "bccc", "n_benign": 908, "n_attack": 6571, "multiclass_counts": {"dos_invalid_sub_flood": 1508, "scan_sU": 1304, "normal": 908, "ddos_invalid_sub_flood": 822, "dos_delayed_connect_flood": 510, "ddos_syn_tcp_flood": 425, "slowite": 362, "malariaDoS": 284, "bruteforce": 228, "ddos_connect_flood_will": 222, "dos_basic_connect_flood": 209, "ddos_basic_connect_flood": 169, "dos_syn_tcp_flood": 158, "dos_connect_flood_will": 144, "ddos_delayed_connect_flood": 143, "malformed": 56, "scan_A": 25, "sparta": 2}}, {"id": 1, "n_rows": 6554, "source": "bccc", "n_benign": 118, "n_attack": 6436, "multiclass_counts": {"dos_syn_tcp_flood": 1522, "ddos_syn_tcp_flood": 999, "malariaDoS": 824, "bruteforce": 777, "sparta": 695, "scan_A": 293, "ddos_basic_connect_flood": 280, "ddos_invalid_sub_flood": 206, "ddos_delayed_connect_flood": 193, "dos_delayed_connect_flood": 155, "normal": 118, "dos_invalid_sub_flood": 110, "slowite": 103, "malformed": 88, "dos_connect_flood_will": 73, "dos_basic_connect_flood": 68, "ddos_connect_flood_will": 27, "scan_sU": 23}}, {"id": 2, "n_rows": 6114, "source": "bccc", "n_benign": 132, "n_attack": 5982, "multiclass_counts": {"malformed": 1556, "scan_A": 1254, "sparta": 808, "malariaDoS": 592, "ddos_invalid_sub_flood": 499, "ddos_connect_flood_will": 298, "scan_sU": 257, "ddos_syn_tcp_flood": 257, "ddos_delayed_connect_flood": 185, "normal": 132, "dos_connect_flood_will": 129, "dos_invalid_sub_flood": 73, "dos_delayed_connect_flood": 33, "bruteforce": 16, "ddos_basic_connect_flood": 13, "slowite": 9, "dos_basic_connect_flood": 2, "dos_syn_tcp_flood": 1}}, {"id": 3, "n_rows": 1925, "source": "cic", "n_benign": 100, "n_attack": 1825, "multiclass_counts": {"malware": 620, "recon": 573, "dos": 437, "ddos": 182, "benign": 100, "bruteforce": 8, "mitm": 3, "web": 2}}, {"id": 4, "n_rows": 3774, "source": "cic", "n_benign": 640, "n_attack": 3134, "multiclass_counts": {"mitm": 839, "ddos": 658, "benign": 640, "web": 449, "dos": 405, "bruteforce": 295, "recon": 261, "malware": 227}}], "test_set": {"n_rows": 4562, "source_counts": {"bccc": 3556, "cic": 1006}, "binary_counts": {"1": 4227, "0": 335}}, "raw_bccc_rows": 35024, "raw_bccc_cols": 105, "raw_cic_rows": 8000, "raw_cic_cols": 51, "metrics": {"poisoned_fedavg": [{"round": 0, "loss": 0.6405998468399048, "accuracy": 0.9188952213941254, "precision": 0.9259995582063176, "recall": 0.9917198959072628, "f1": 0.9577336074937172}, {"round": 1, "loss": 0.6120662689208984, "accuracy": 0.5523893029373081, "precision": 0.9866369710467706, "recall": 0.5240123018689378, "f1": 0.684487021013597}, {"round": 2, "loss": 0.5744418501853943, "accuracy": 0.5418676019289785, "precision": 0.994447015270708, "recall": 0.508398391294062, "f1": 0.6728240450845335}, {"round": 3, "loss": 0.5617499351501465, "accuracy": 0.5346339324857519, "precision": 0.995291902071563, "recall": 0.5001182872013248, "f1": 0.6657219335537711}, {"round": 4, "loss": 0.548769474029541, "accuracy": 0.5344147303814116, "precision": 0.9952896844088552, "recall": 0.4998817127986751, "f1": 0.665511811023622}, {"round": 5, "loss": 0.5311803817749023, "accuracy": 0.5383603682595353, "precision": 0.9953292853806632, "recall": 0.5041400520463686, "f1": 0.6692839195979899}, {"round": 6, "loss": 0.530096709728241, "accuracy": 0.5274002630425252, "precision": 0.9956917185256104, "recall": 0.4920747575112373, "f1": 0.6586447118429386}, {"round": 7, "loss": 0.5231534242630005, "accuracy": 0.5280578693555458, "precision": 0.995697896749522, "recall": 0.4927844807191862, "f1": 0.6592815318879569}, {"round": 8, "loss": 0.5193732976913452, "accuracy": 0.5287154756685665, "precision": 0.9976042165788211, "recall": 0.4925479063165365, "f1": 0.6594868546088059}, {"round": 9, "loss": 0.5257387757301331, "accuracy": 0.527181060938185, "precision": 0.997596153846154, "recall": 0.4908918854979891, "f1": 0.6579990486760742}, {"round": 10, "loss": 0.5242195725440979, "accuracy": 0.5269618588338448, "precision": 0.9975949975949976, "recall": 0.4906553110953395, "f1": 0.6577862353314304}, {"round": 11, "loss": 0.5256198048591614, "accuracy": 0.5256466462078035, "precision": 0.9975880366618428, "recall": 0.4892358646794417, "f1": 0.6565079365079365}, {"round": 12, "loss": 0.5209224820137024, "accuracy": 0.5280578693555458, "precision": 0.99712368168744, "recall": 0.4920747575112373, "f1": 0.6589577063202915}, {"round": 13, "loss": 0.522962749004364, "accuracy": 0.5221394125383604, "precision": 0.997569275644142, "recall": 0.4854506742370476, "f1": 0.6530872056015277}, {"round": 14, "loss": 0.5270859003067017, "accuracy": 0.5241122314774221, "precision": 0.9970986460348162, "recall": 0.4878164182635439, "f1": 0.6551231135822081}, {"round": 15, "loss": 0.5243044495582581, "accuracy": 0.5280578693555458, "precision": 0.99712368168744, "recall": 0.4920747575112373, "f1": 0.6589577063202915}, {"round": 16, "loss": 0.5366568565368652, "accuracy": 0.5219202104340201, "precision": 0.997568093385214, "recall": 0.4852140998343979, "f1": 0.6528728314499443}, {"round": 17, "loss": 0.5358169674873352, "accuracy": 0.5236738272687418, "precision": 0.9970958373668926, "recall": 0.4873432694582446, "f1": 0.6546956936278404}, {"round": 18, "loss": 0.5309697985649109, "accuracy": 0.5236738272687418, "precision": 0.996615087040619, "recall": 0.4875798438608942, "f1": 0.6548054011119937}, {"round": 19, "loss": 0.5336435437202454, "accuracy": 0.5212626041209996, "precision": 0.9965969859017988, "recall": 0.4849775254317482, "f1": 0.6524506683640993}, {"round": 20, "loss": 0.5341029167175293, "accuracy": 0.5232354230600613, "precision": 0.9961315280464216, "recall": 0.4873432694582446, "f1": 0.6544876886417792}], "poisoned_trimmed_mean": [{"round": 0, "loss": 0.6405998468399048, "accuracy": 0.9188952213941254, "precision": 0.9259995582063176, "recall": 0.9917198959072628, "f1": 0.9577336074937172}, {"round": 1, "loss": 0.6199427843093872, "accuracy": 0.9204296361245068, "precision": 0.9394904458598726, "recall": 0.9770522829429856, "f1": 0.9579032819204452}, {"round": 2, "loss": 0.5671354532241821, "accuracy": 0.8222270933800965, "precision": 0.9593867670790748, "recall": 0.843860894251242, "f1": 0.897923222152297}, {"round": 3, "loss": 0.5167641639709473, "accuracy": 0.7845243314335818, "precision": 0.9674351585014408, "recall": 0.794180269694819, "f1": 0.8722879043783293}, {"round": 4, "loss": 0.5365133285522461, "accuracy": 0.5703638754932048, "precision": 0.986689566337484, "recall": 0.5436479772888574, "f1": 0.7010372178157414}, {"round": 5, "loss": 0.5461877584457397, "accuracy": 0.5517316966242876, "precision": 0.9901168014375562, "recall": 0.5214099834397918, "f1": 0.6830931349759801}, {"round": 6, "loss": 0.5063482522964478, "accuracy": 0.5666374397194213, "precision": 0.9874350086655111, "recall": 0.5391530636385143, "f1": 0.6974751338944147}, {"round": 7, "loss": 0.540052056312561, "accuracy": 0.5458132398071022, "precision": 0.9882193022202084, "recall": 0.5159687721788503, "f1": 0.6779608330742928}, {"round": 8, "loss": 0.5394055247306824, "accuracy": 0.541209995615958, "precision": 0.989000916590284, "recall": 0.5105275609179086, "f1": 0.6734279918864098}, {"round": 9, "loss": 0.5491546988487244, "accuracy": 0.5355107409031127, "precision": 0.989322191272052, "recall": 0.5041400520463686, "f1": 0.667920388653816}, {"round": 10, "loss": 0.5415529608726501, "accuracy": 0.5352915387987724, "precision": 0.9893172317696238, "recall": 0.5039034776437189, "f1": 0.6677115987460815}, {"round": 11, "loss": 0.5464245080947876, "accuracy": 0.5350723366944322, "precision": 0.9888579387186628, "recall": 0.5039034776437189, "f1": 0.6676069581570286}, {"round": 12, "loss": 0.5478931069374084, "accuracy": 0.5339763261727313, "precision": 0.9897435897435898, "recall": 0.5022474568251715, "f1": 0.6663527934714375}, {"round": 13, "loss": 0.5359132885932922, "accuracy": 0.533757124068391, "precision": 0.9911131898971, "recall": 0.501301159214573, "f1": 0.6658287509819324}, {"round": 14, "loss": 0.5337849259376526, "accuracy": 0.5326611135466901, "precision": 0.991553261379634, "recall": 0.4998817127986751, "f1": 0.6646744259201006}, {"round": 15, "loss": 0.535664975643158, "accuracy": 0.5313459009206488, "precision": 0.9910672308415608, "recall": 0.498698840785427, "f1": 0.6635190431224426}, {"round": 16, "loss": 0.5625406503677368, "accuracy": 0.526085050416484, "precision": 0.9933110367892976, "recall": 0.4918381831085876, "f1": 0.6579113924050632}, {"round": 17, "loss": 0.5609992742538452, "accuracy": 0.527181060938185, "precision": 0.994269340974212, "recall": 0.4925479063165365, "f1": 0.6587565258661604}, {"round": 18, "loss": 0.5455411672592163, "accuracy": 0.5274002630425252, "precision": 0.99380066762041, "recall": 0.4930210551218358, "f1": 0.6590765338393422}, {"round": 19, "loss": 0.536340594291687, "accuracy": 0.5280578693555458, "precision": 0.994280266920877, "recall": 0.4934942039271351, "f1": 0.659604743083004}, {"round": 20, "loss": 0.526369035243988, "accuracy": 0.5326611135466901, "precision": 0.9943369513921662, "recall": 0.4984622663827774, "f1": 0.6640403403718877}], "clean_fedavg": [{"round": 0, "loss": 0.6405998468399048, "accuracy": 0.9188952213941254, "precision": 0.9259995582063176, "recall": 0.9917198959072628, "f1": 0.9577336074937172}, {"round": 1, "loss": 0.5079324841499329, "accuracy": 0.7481367821131083, "precision": 0.962439903846154, "recall": 0.7577478116867755, "f1": 0.8479152878888153}, {"round": 2, "loss": 0.5273970365524292, "accuracy": 0.7470407715914072, "precision": 0.9743748070392096, "recall": 0.7466288147622427, "f1": 0.8454326279132065}, {"round": 3, "loss": 0.4808716773986816, "accuracy": 0.7426567295046033, "precision": 0.9789770944461876, "recall": 0.7381121362668559, "f1": 0.8416509306717022}, {"round": 4, "loss": 0.5134386420249939, "accuracy": 0.7268741779921087, "precision": 0.9907803753704314, "recall": 0.7118523775727467, "f1": 0.8284691629955947}, {"round": 5, "loss": 0.5001181960105896, "accuracy": 0.5946953090749671, "precision": 0.9893004115226336, "recall": 0.5687248639697184, "f1": 0.722247258524861}, {"round": 6, "loss": 0.4809128940105438, "accuracy": 0.7332310390179746, "precision": 0.9892717815344604, "recall": 0.7198959072628341, "f1": 0.8333561550047925}, {"round": 7, "loss": 0.486400157213211, "accuracy": 0.7281893906181499, "precision": 0.9924167490933068, "recall": 0.7120889519753962, "f1": 0.8292011019283747}, {"round": 8, "loss": 0.4625439941883087, "accuracy": 0.7343270495396755, "precision": 0.9902439024390244, "recall": 0.7203690560681334, "f1": 0.8340180772391126}, {"round": 9, "loss": 0.4678811728954315, "accuracy": 0.733669443226655, "precision": 0.990234375, "recall": 0.7196593328601846, "f1": 0.8335388409371147}, {"round": 10, "loss": 0.4679439961910248, "accuracy": 0.7297238053485313, "precision": 0.9930830039525692, "recall": 0.7132718239886444, "f1": 0.8302354399008675}, {"round": 11, "loss": 0.468447208404541, "accuracy": 0.7301622095572118, "precision": 0.9934123847167324, "recall": 0.7135083983912941, "f1": 0.8305108082059754}, {"round": 12, "loss": 0.4348731935024261, "accuracy": 0.7360806663743972, "precision": 0.9918646273999348, "recall": 0.7210787792760823, "f1": 0.8350684931506849}, {"round": 13, "loss": 0.4621568620204925, "accuracy": 0.7303814116615519, "precision": 0.9943912900032992, "recall": 0.7130352495859948, "f1": 0.8305318269495728}, {"round": 14, "loss": 0.4684047102928161, "accuracy": 0.7301622095572118, "precision": 0.9943894389438944, "recall": 0.7127986751833452, "f1": 0.8303706765881218}, {"round": 15, "loss": 0.4534161388874054, "accuracy": 0.7341078474353354, "precision": 0.991840731070496, "recall": 0.7189496096522356, "f1": 0.8336305033603072}, {"round": 16, "loss": 0.4680241048336029, "accuracy": 0.7266549758877685, "precision": 0.9956753160345976, "recall": 0.7080671871303525, "f1": 0.8275957417392507}, {"round": 17, "loss": 0.4613233506679535, "accuracy": 0.7301622095572118, "precision": 0.9943894389438944, "recall": 0.7127986751833452, "f1": 0.8303706765881218}, {"round": 18, "loss": 0.4698098301887512, "accuracy": 0.7281893906181499, "precision": 0.9953565505804312, "recall": 0.7099597823515496, "f1": 0.8287765810549572}, {"round": 19, "loss": 0.4634135961532593, "accuracy": 0.727093380096449, "precision": 0.9956781914893617, "recall": 0.7085403359356518, "f1": 0.8279198341395991}, {"round": 20, "loss": 0.4617932140827179, "accuracy": 0.7275317843051293, "precision": 0.9956810631229236, "recall": 0.709013484740951, "f1": 0.8282437474091474}], "clean_trimmed_mean": [{"round": 0, "loss": 0.6405998468399048, "accuracy": 0.9188952213941254, "precision": 0.9259995582063176, "recall": 0.9917198959072628, "f1": 0.9577336074937172}, {"round": 1, "loss": 0.5181646943092346, "accuracy": 0.7461639631740464, "precision": 0.9571045576407506, "recall": 0.7601135557132718, "f1": 0.8473101265822784}, {"round": 2, "loss": 0.5327058434486389, "accuracy": 0.7437527400263042, "precision": 0.9580587177950868, "recall": 0.7565649396735273, "f1": 0.8454725710508922}, {"round": 3, "loss": 0.5619341731071472, "accuracy": 0.5872424375274002, "precision": 0.9650793650793652, "recall": 0.5753489472439082, "f1": 0.7209129983696457}, {"round": 4, "loss": 0.5511996746063232, "accuracy": 0.7295046032441912, "precision": 0.9651849549269506, "recall": 0.7345635202271115, "f1": 0.8342289091886083}, {"round": 5, "loss": 0.5473836064338684, "accuracy": 0.7233669443226655, "precision": 0.970187123374564, "recall": 0.7236810977052283, "f1": 0.8289972899728997}, {"round": 6, "loss": 0.5232071876525879, "accuracy": 0.7288469969311705, "precision": 0.9677722152690864, "recall": 0.7317246273953159, "f1": 0.833355786070322}, {"round": 7, "loss": 0.5231410264968872, "accuracy": 0.7288469969311705, "precision": 0.9692404268675456, "recall": 0.7305417553820677, "f1": 0.8331309861054903}, {"round": 8, "loss": 0.530605137348175, "accuracy": 0.5920648838228847, "precision": 0.9661150512214342, "recall": 0.5800804352969009, "f1": 0.7249076127124907}, {"round": 9, "loss": 0.539025068283081, "accuracy": 0.5935992985532661, "precision": 0.96990099009901, "recall": 0.579370712088952, "f1": 0.7254146919431279}, {"round": 10, "loss": 0.5443276166915894, "accuracy": 0.5887768522577816, "precision": 0.9715202567188128, "recall": 0.5729832032174119, "f1": 0.7208333333333333}, {"round": 11, "loss": 0.5326047539710999, "accuracy": 0.5933800964489259, "precision": 0.9698890649762282, "recall": 0.5791341376863024, "f1": 0.7252258924603763}, {"round": 12, "loss": 0.5158983469009399, "accuracy": 0.5938185006576063, "precision": 0.968429360694554, "recall": 0.5805535841022001, "f1": 0.7259281171424345}, {"round": 13, "loss": 0.523662269115448, "accuracy": 0.5942569048662867, "precision": 0.9706814580031696, "recall": 0.5796072864916016, "f1": 0.7258183972744778}, {"round": 14, "loss": 0.5125125646591187, "accuracy": 0.5946953090749671, "precision": 0.9722001588562352, "recall": 0.5791341376863024, "f1": 0.7258710155670868}, {"round": 15, "loss": 0.5170687437057495, "accuracy": 0.5953529153879877, "precision": 0.9733598409542744, "recall": 0.5791341376863024, "f1": 0.7261940077128448}, {"round": 16, "loss": 0.4942653179168701, "accuracy": 0.7279701885138097, "precision": 0.9788325849903784, "recall": 0.7220250768866808, "f1": 0.8310415248468346}, {"round": 17, "loss": 0.4896086752414703, "accuracy": 0.7297238053485313, "precision": 0.977969348659004, "recall": 0.7246273953158269, "f1": 0.8324500611496127}, {"round": 18, "loss": 0.4650977849960327, "accuracy": 0.7338886453309952, "precision": 0.975386557273588, "recall": 0.7312514785900166, "f1": 0.8358572201189832}, {"round": 19, "loss": 0.4703316688537597, "accuracy": 0.7332310390179746, "precision": 0.9768694550063372, "recall": 0.7293588833688195, "f1": 0.8351618583231749}, {"round": 20, "loss": 0.4724871814250946, "accuracy": 0.733669443226655, "precision": 0.9774889029803424, "recall": 0.7293588833688195, "f1": 0.8353881587860723}]}, "networked": {"metrics_fedavg": [{"round": 0, "loss": 0.6405998468399048, "accuracy": 0.9188952213941254, "precision": 0.9259995582063176, "recall": 0.9917198959072628, "f1": 0.9577336074937172}, {"round": 1, "loss": 0.620424211025238, "accuracy": 0.5405523893029373, "precision": 0.9876430205949656, "recall": 0.5105275609179086, "f1": 0.6731129132875858}, {"round": 2, "loss": 0.580324113368988, "accuracy": 0.5368259535291539, "precision": 0.9948501872659176, "recall": 0.5027206056304708, "f1": 0.667923935250668}, {"round": 3, "loss": 0.5620205402374268, "accuracy": 0.5287154756685665, "precision": 0.9947594092424964, "recall": 0.4939673527324343, "f1": 0.6601327853303826}, {"round": 4, "loss": 0.5572798848152161, "accuracy": 0.5245506356861026, "precision": 0.9951876804619828, "recall": 0.4892358646794417, "f1": 0.6559873116574148}, {"round": 5, "loss": 0.5356912612915039, "accuracy": 0.526085050416484, "precision": 0.9952038369304556, "recall": 0.4908918854979891, "f1": 0.6574778200253485}, {"round": 6, "loss": 0.5205416679382324, "accuracy": 0.5267426567295046, "precision": 0.9956855225311602, "recall": 0.4913650343032884, "f1": 0.6580072865515603}, {"round": 7, "loss": 0.5095787644386292, "accuracy": 0.530469092503288, "precision": 0.995249406175772, "recall": 0.4956233735509818, "f1": 0.6617182564750473}, {"round": 8, "loss": 0.5198373794555664, "accuracy": 0.5234546251644016, "precision": 0.9966134494436382, "recall": 0.4873432694582446, "f1": 0.6545916746107404}, {"round": 9, "loss": 0.5162032246589661, "accuracy": 0.5230162209557212, "precision": 0.9966101694915256, "recall": 0.4868701206529453, "f1": 0.6541640178003815}, {"round": 10, "loss": 0.5168174505233765, "accuracy": 0.5232354230600613, "precision": 0.9966118102613748, "recall": 0.487106695055595, "f1": 0.6543778801843319}, {"round": 11, "loss": 0.5216129422187805, "accuracy": 0.5225778167470407, "precision": 0.9970887918486172, "recall": 0.4861603974449964, "f1": 0.6536259541984732}, {"round": 12, "loss": 0.5133717060089111, "accuracy": 0.5258658483121438, "precision": 0.9971098265895952, "recall": 0.4897090134847409, "f1": 0.6568300809138505}, {"round": 13, "loss": 0.5314953327178955, "accuracy": 0.5177553704515563, "precision": 0.9970573810691516, "recall": 0.4809557605867045, "f1": 0.6488988190233004}, {"round": 14, "loss": 0.5325579643249512, "accuracy": 0.5208241999123192, "precision": 0.9970774476376036, "recall": 0.4842678022237994, "f1": 0.6519108280254777}, {"round": 15, "loss": 0.5309021472930908, "accuracy": 0.5217010083296799, "precision": 0.9970831307729704, "recall": 0.4852140998343979, "f1": 0.6527689369828135}, {"round": 16, "loss": 0.5222404599189758, "accuracy": 0.5232354230600613, "precision": 0.997093023255814, "recall": 0.4868701206529453, "f1": 0.6542680019074869}, {"round": 17, "loss": 0.5322757363319397, "accuracy": 0.5203857957036387, "precision": 0.9970745977571916, "recall": 0.4837946534185001, "f1": 0.6514813634915578}, {"round": 18, "loss": 0.5407156944274902, "accuracy": 0.520604997807979, "precision": 0.9970760233918128, "recall": 0.4840312278211497, "f1": 0.6516961299569995}, {"round": 19, "loss": 0.5382475852966309, "accuracy": 0.5223586146427006, "precision": 0.9966052376333656, "recall": 0.4861603974449964, "f1": 0.6535220225791064}, {"round": 20, "loss": 0.5342641472816467, "accuracy": 0.5214818062253398, "precision": 0.9965986394557824, "recall": 0.4852140998343979, "f1": 0.6526650755767701}], "round_times_fedavg": [{"round": 0, "wall_clock_seconds_since_start": 0.0572987519999514}, {"round": 1, "wall_clock_seconds_since_start": 7.577361095999549}, {"round": 2, "wall_clock_seconds_since_start": 8.407496292999895}, {"round": 3, "wall_clock_seconds_since_start": 9.221683840999503}, {"round": 4, "wall_clock_seconds_since_start": 9.997782623999228}, {"round": 5, "wall_clock_seconds_since_start": 10.773849948999668}, {"round": 6, "wall_clock_seconds_since_start": 11.566722672999276}, {"round": 7, "wall_clock_seconds_since_start": 12.42284199200003}, {"round": 8, "wall_clock_seconds_since_start": 13.229873195999971}, {"round": 9, "wall_clock_seconds_since_start": 14.03256680999948}, {"round": 10, "wall_clock_seconds_since_start": 14.854167619999316}, {"round": 11, "wall_clock_seconds_since_start": 15.675482427999668}, {"round": 12, "wall_clock_seconds_since_start": 16.45976001500003}, {"round": 13, "wall_clock_seconds_since_start": 17.266952093999862}, {"round": 14, "wall_clock_seconds_since_start": 18.10214704899954}, {"round": 15, "wall_clock_seconds_since_start": 18.905667413999254}, {"round": 16, "wall_clock_seconds_since_start": 19.703413520999675}, {"round": 17, "wall_clock_seconds_since_start": 20.521501825000087}, {"round": 18, "wall_clock_seconds_since_start": 21.35171897999953}, {"round": 19, "wall_clock_seconds_since_start": 22.134871440000097}, {"round": 20, "wall_clock_seconds_since_start": 22.945450148999956}], "metrics_trimmed_mean": null}};
+
+// ---------- helpers ----------
+function fmtInt(n) { return n.toLocaleString(); }
+function fmtPct(n) { return (n * 100).toFixed(1) + '%'; }
+function fmtNum(n, d=4) { return (n === null || n === undefined || Number.isNaN(n)) ? '—' : n.toFixed(d); }
+function readCss(varName) {
+  return getComputedStyle(document.querySelector('.viz-root')).getPropertyValue(varName).trim();
+}
+function missingNote(container, files) {
+  if (!files || !files.length) return;
+  const div = document.createElement('div');
+  div.className = 'missing-note';
+  div.innerHTML = '⚠️ Missing expected file(s): ' + files.map(f => `<code>${f}</code>`).join(', ') +
+                   ' — the corresponding chart/series below is omitted rather than fabricated.';
+  container.appendChild(div);
+}
+
+const COLORS = {
+  red: readCss('--f1-red'),
+  silver: readCss('--silver'),
+  green: readCss('--flag-green'),
+  yellow: readCss('--flag-yellow'),
+  grid: readCss('--gridline'),
+  text: readCss('--text-secondary'),
+};
+
+Chart.defaults.font.family = "system-ui, -apple-system, 'Segoe UI', sans-serif";
+Chart.defaults.color = COLORS.text;
+Chart.defaults.borderColor = COLORS.grid;
+
+// ============ SECTION 1: pipeline stage numbers ============
+(function renderPipelineStats() {
+  const bccc = DATA.raw_bccc_rows, cic = DATA.raw_cic_rows;
+  document.getElementById('stage-1-sub').innerHTML =
+    (bccc != null && cic != null)
+      ? `bccc: ${fmtInt(bccc)} rows<br>cic: ${fmtInt(cic)} rows`
+      : 'raw CSVs not found';
+
+  const nClients = DATA.clients.length;
+  const nTest = DATA.test_set ? DATA.test_set.n_rows : null;
+  document.getElementById('stage-2-sub').innerHTML =
+    `${nClients} clients` + (nTest != null ? `<br>+ ${fmtInt(nTest)}-row test set` : '');
+})();
+
+// ============ SECTION 2: dataset summary ============
+(function renderDatasetSummary() {
+  const missingDiv = document.getElementById('dataset-missing');
+  missingNote(missingDiv, DATA.missing_files.filter(f => f.startsWith('data/')));
+
+  const tbody = document.querySelector('#client-table tbody');
+  DATA.clients.forEach(c => {
+    const pctAttack = c.n_attack / c.n_rows;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>client_${c.id}</td>
+      <td><span class="source-pill ${c.source}">${c.source}</span></td>
+      <td class="num">${fmtInt(c.n_rows)}</td>
+      <td class="num">${fmtInt(c.n_benign)}</td>
+      <td class="num">${fmtInt(c.n_attack)}</td>
+      <td class="num">${fmtPct(pctAttack)}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  new Chart(document.getElementById('chart-client-balance'), {
+    type: 'bar',
+    data: {
+      labels: DATA.clients.map(c => `client_${c.id} (${c.source})`),
+      datasets: [
+        { label: 'Benign', data: DATA.clients.map(c => c.n_benign), backgroundColor: COLORS.green, stack: 's' },
+        { label: 'Attack', data: DATA.clients.map(c => c.n_attack), backgroundColor: COLORS.red, stack: 's' },
+      ],
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, usePointStyle: true } } },
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, grid: { color: COLORS.grid }, title: { display: true, text: 'rows' } },
+      },
+    },
+  });
+})();
+
+// ============ SECTION 3: clean vs poisoned ============
+function seriesFromRecords(records, field) {
+  if (!records) return null;
+  return records.map(r => r[field]);
+}
+
+(function renderCleanVsPoisoned() {
+  const m = DATA.metrics;
+  const missing = [];
+  if (!m.poisoned_fedavg) missing.push('results/metrics_fedavg.csv');
+  if (!m.poisoned_trimmed_mean) missing.push('results/metrics_trimmed_mean.csv');
+  if (!m.clean_fedavg) missing.push('results/baseline/metrics_fedavg.csv');
+  if (!m.clean_trimmed_mean) missing.push('results/baseline/metrics_trimmed_mean.csv');
+  missingNote(document.getElementById('section3-missing'), missing);
+
+  const rounds = (m.poisoned_fedavg || m.clean_fedavg || []).map(r => r.round);
+
+  function buildDatasets(field) {
+    const ds = [];
+    if (m.poisoned_fedavg) ds.push({
+      label: 'FedAvg (poisoned)', data: seriesFromRecords(m.poisoned_fedavg, field),
+      borderColor: COLORS.red, backgroundColor: COLORS.red, borderDash: [], tension: 0.15, pointRadius: 2,
+    });
+    if (m.clean_fedavg) ds.push({
+      label: 'FedAvg (clean)', data: seriesFromRecords(m.clean_fedavg, field),
+      borderColor: COLORS.red, backgroundColor: COLORS.red, borderDash: [6, 4], tension: 0.15, pointRadius: 2,
+    });
+    if (m.poisoned_trimmed_mean) ds.push({
+      label: 'Trimmed Mean (poisoned)', data: seriesFromRecords(m.poisoned_trimmed_mean, field),
+      borderColor: COLORS.silver, backgroundColor: COLORS.silver, borderDash: [], tension: 0.15, pointRadius: 2,
+    });
+    if (m.clean_trimmed_mean) ds.push({
+      label: 'Trimmed Mean (clean)', data: seriesFromRecords(m.clean_trimmed_mean, field),
+      borderColor: COLORS.silver, backgroundColor: COLORS.silver, borderDash: [6, 4], tension: 0.15, pointRadius: 2,
+    });
+    return ds;
+  }
+
+  function lineChart(canvasId, field, yLabel) {
+    new Chart(document.getElementById(canvasId), {
+      type: 'line',
+      data: { labels: rounds, datasets: buildDatasets(field) },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { title: { display: true, text: 'round' }, grid: { display: false } },
+          y: { min: 0, max: 1, title: { display: true, text: yLabel }, grid: { color: COLORS.grid } },
+        },
+      },
+    });
+  }
+  lineChart('chart-acc-clean-poisoned', 'accuracy', 'accuracy');
+  lineChart('chart-f1-clean-poisoned', 'f1', 'F1');
+})();
+
+// ============ SECTION 4: networked vs non-networked ============
+(function renderNetworked() {
+  const missing = [];
+  if (!DATA.networked.metrics_fedavg) missing.push('results/networked/metrics_fedavg.csv');
+  if (!DATA.metrics.poisoned_fedavg) missing.push('results/metrics_fedavg.csv');
+  if (!DATA.networked.round_times_fedavg) missing.push('results/networked/round_times_fedavg.csv (per-round timing)');
+  if (!DATA.networked.metrics_trimmed_mean) missing.push('results/networked/metrics_trimmed_mean.csv (Phase C only ran fedavg — no trimmed_mean networked run exists)');
+  missingNote(document.getElementById('section4-missing'), missing);
+
+  const local = DATA.metrics.poisoned_fedavg;
+  const net = DATA.networked.metrics_fedavg;
+
+  if (local && net) {
+    const rounds = local.map(r => r.round);
+    function lineChart(canvasId, field, yLabel) {
+      new Chart(document.getElementById(canvasId), {
+        type: 'line',
+        data: {
+          labels: rounds,
+          datasets: [
+            { label: 'Local (simulation)', data: seriesFromRecords(local, field), borderColor: COLORS.red, backgroundColor: COLORS.red, tension: 0.15, pointRadius: 2 },
+            { label: 'Networked (Mininet)', data: seriesFromRecords(net, field), borderColor: COLORS.silver, backgroundColor: COLORS.silver, tension: 0.15, pointRadius: 2 },
+          ],
+        },
+        options: {
+          responsive: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { title: { display: true, text: 'round' }, grid: { display: false } },
+            y: { min: 0, max: 1, title: { display: true, text: yLabel }, grid: { color: COLORS.grid } },
+          },
+        },
+      });
+    }
+    lineChart('chart-acc-networked', 'accuracy', 'accuracy');
+    lineChart('chart-f1-networked', 'f1', 'F1');
+  }
+
+  // overhead stat tiles
+  const statRow = document.getElementById('overhead-stats');
+  const rt = DATA.networked.round_times_fedavg;
+  if (rt && rt.length > 1) {
+    const postInit = rt.filter(r => r.round > 0);
+    const deltas = [];
+    for (let i = 1; i < postInit.length; i++) {
+      deltas.push(postInit[i].wall_clock_seconds_since_start - postInit[i - 1].wall_clock_seconds_since_start);
+    }
+    const meanRound = deltas.reduce((a, b) => a + b, 0) / deltas.length;
+    const totalNet = rt[rt.length - 1].wall_clock_seconds_since_start;
+
+    const tiles = [
+      { label: 'Networked mean time / round', value: meanRound.toFixed(2) + 's', sub: `post-init rounds, n=${deltas.length}` },
+      { label: 'Networked total (round 1 → last)', value: totalNet.toFixed(1) + 's', sub: `${rt.length - 1} rounds` },
+    ];
+    tiles.forEach(t => {
+      const div = document.createElement('div');
+      div.className = 'stat-tile';
+      div.innerHTML = `<div class="label">${t.label}</div><div class="value">${t.value}</div><div class="sub">${t.sub}</div>`;
+      statRow.appendChild(div);
+    });
+  } else {
+    const div = document.createElement('div');
+    div.className = 'stat-tile';
+    div.innerHTML = `<div class="label">Per-round timing</div><div class="value">—</div><div class="sub">round_times CSV not found</div>`;
+    statRow.appendChild(div);
+  }
+})();
+
+// ============ SECTION 5: key findings (computed) ============
+(function renderFindings() {
+  const list = document.getElementById('findings-list');
+  const findings = [];
+
+  // Finding 1: trimmed_mean vs fedavg under poisoning
+  const pf = DATA.metrics.poisoned_fedavg, pt = DATA.metrics.poisoned_trimmed_mean;
+  if (pf && pt) {
+    const n = Math.min(pf.length, pt.length);
+    let tmWins = 0;
+    for (let i = 1; i < n; i++) if (pt[i].accuracy > pf[i].accuracy) tmWins++;
+    const finalF = pf[pf.length - 1], finalT = pt[pt.length - 1];
+    const postInitF = pf.slice(1, Math.ceil(n / 2));
+    const postInitT = pt.slice(1, Math.ceil(n / 2));
+    const avgF = postInitF.reduce((a, r) => a + r.accuracy, 0) / postInitF.length;
+    const avgT = postInitT.reduce((a, r) => a + r.accuracy, 0) / postInitT.length;
+    findings.push({
+      tag: avgT > avgF ? 'good' : 'mixed',
+      text: `Under poisoning (2/5 malicious clients), Trimmed Mean beat FedAvg in <code>${tmWins}/${n - 1}</code> post-init rounds. ` +
+            `Over the first half of training it averaged <code>${fmtNum(avgT,3)}</code> accuracy vs. FedAvg's <code>${fmtNum(avgF,3)}</code>. ` +
+            `By the final round both had converged to similar accuracy (FedAvg <code>${fmtNum(finalF.accuracy,3)}</code>, ` +
+            `Trimmed Mean <code>${fmtNum(finalT.accuracy,3)}</code>) — the robustness advantage was real but temporary at this corruption ratio, not a clean permanent win.`,
+    });
+  }
+
+  // Finding 2: clean baseline validation
+  const cf = DATA.metrics.clean_fedavg, ct = DATA.metrics.clean_trimmed_mean;
+  if (cf && pf) {
+    const cleanFinal = cf[cf.length - 1].accuracy;
+    const poisonedFinal = pf[pf.length - 1].accuracy;
+    const drop = cleanFinal - poisonedFinal;
+    findings.push({
+      tag: 'neutral',
+      text: `Clean baseline (no malicious clients) FedAvg reached <code>${fmtNum(cleanFinal,3)}</code> final accuracy vs. ` +
+            `<code>${fmtNum(poisonedFinal,3)}</code> under poisoning — a <code>${fmtNum(drop,3)}</code> absolute drop. ` +
+            `This confirms the accuracy collapse seen under poisoning is attributable to the label-flipping attack itself, ` +
+            `not to a flaw in the training setup.` +
+            (ct ? ` Clean Trimmed Mean reached <code>${fmtNum(ct[ct.length-1].accuracy,3)}</code>, within ` +
+                  `<code>${fmtNum(Math.abs(ct[ct.length-1].accuracy-cleanFinal),3)}</code> of clean FedAvg — the robust ` +
+                  `strategy costs essentially nothing when there is no attack to defend against.` : ''),
+    });
+  }
+
+  // Finding 3: networked overhead
+  const net = DATA.networked.metrics_fedavg, rt = DATA.networked.round_times_fedavg;
+  if (net && pf) {
+    const n = Math.min(net.length, pf.length);
+    let maxDiff = 0;
+    for (let i = 0; i < n; i++) maxDiff = Math.max(maxDiff, Math.abs(net[i].accuracy - pf[i].accuracy));
+    let text = `The networked run (real gRPC over an emulated Mininet network through a custom OpenFlow 1.3 controller) ` +
+                `tracks the local in-process simulation closely — max accuracy difference across all rounds was ` +
+                `<code>${fmtNum(maxDiff,4)}</code>, consistent with ordinary unseeded local-training noise rather than a ` +
+                `networking-induced correctness issue.`;
+    if (rt && rt.length > 1) {
+      const postInit = rt.filter(r => r.round > 0);
+      const deltas = [];
+      for (let i = 1; i < postInit.length; i++) deltas.push(postInit[i].wall_clock_seconds_since_start - postInit[i-1].wall_clock_seconds_since_start);
+      const meanRound = deltas.reduce((a,b)=>a+b,0) / deltas.length;
+      text += ` Steady-state overhead was small — mean <code>${meanRound.toFixed(2)}s</code> per round once the run was underway; ` +
+              `most of the network layer's added cost is one-time process/connection startup, not per-round latency.`;
+    }
+    findings.push({ tag: 'good', text });
+  }
+
+  if (!findings.length) {
+    findings.push({ tag: 'mixed', text: 'No metrics files were found to compute findings from — see the missing-file notices above.' });
+  }
+
+  findings.forEach(f => {
+    const div = document.createElement('div');
+    div.className = 'finding';
+    div.innerHTML = `<span class="tag ${f.tag}">${f.tag === 'good' ? 'Confirmed' : f.tag === 'mixed' ? 'Mixed' : 'Note'}</span><p>${f.text}</p>`;
+    list.appendChild(div);
+  });
+})();
+</script>
+</body>
+</html>

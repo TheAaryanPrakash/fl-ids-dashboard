@@ -1,0 +1,139 @@
+[net_client 2] loaded X=(6114, 154), connecting to 10.0.0.1:8080, malicious=False
+[93mWARNING [0m:   DEPRECATED FEATURE: flwr.client.start_client() is deprecated.
+	Instead, use the `flower-supernode` CLI command to start a SuperNode as shown below:
+
+		$ flower-supernode --insecure --superlink='<IP>:<PORT>'
+
+	To view all available options, run:
+
+		$ flower-supernode --help
+
+	Using `start_client()` is deprecated.
+
+            This is a deprecated feature. It will be removed
+            entirely in future versions of Flower.
+        
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 83d1ffd8-d7d1-4777-89a7-41e3abcef17c
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 465ca0df-bdf2-46dd-a4e8-1511a3085e75
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 20175491-9fdc-4800-b940-3b5283315df5
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message d087e721-34ff-4cd5-8793-575e3af9aa17
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message b43c0b70-36ae-4a86-9865-f3de15fcacb9
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message f0460fdd-d06b-45c1-9039-e316a1a0dc8a
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message b129b51b-990e-452b-9d1b-d04f1f6d1550
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 25e5013f-f744-4103-8be8-57e561d2ceaf
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 76a41474-5041-4cc0-96c4-da69d9fd8b6b
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 6fa5a415-1cc7-42e2-9ec9-bc9ee204a80d
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 0d460684-67a1-45ba-acf1-cc0b97ded7f3
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 2240104e-1062-4eeb-bb3a-3a110b5db12b
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 100b1817-781a-406c-a527-6b13b7bd7002
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 3ed0c8ad-81ca-4ac1-9186-ed6d934806e4
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 9d19eebc-eae7-4d9d-8e38-dd4fb68a8028
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 22c8d8e0-ceb5-4b43-8bd4-809772c0c7a4
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 145dcbe0-032b-4ff9-957c-c7c6b5f66633
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 043183b5-ec32-4aa5-a0c6-5ce9eca3edbe
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 5e18c4ca-ba19-4d7e-8a6a-acfa8137e4e7
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 7b38056e-7e6c-4bdd-a3d4-347f88374d5d
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 6498b6e2-bdbb-4db5-a2d0-d25f668e1ba2
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 1c6b6b96-2f68-45ff-a88c-99549f699f05
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message a586c0bc-0850-4bd0-9b61-95eb78bc2ff1
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message cf004e53-a2d6-4afb-b378-87be536a6abb
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 30a55b5f-cdd9-4208-b59b-edb2468fe6f8
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 85e48635-e9fc-42d8-8bf9-af6630217d82
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message fc48fab5-ade3-4b4e-80bc-e4555f008ff3
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 3db806e3-b578-4f32-ae07-03e186d5aeb0
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message cd231714-a802-4abb-82db-64f83a4b6f95
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 2b962161-a3bb-44dc-989e-44c977608d8a
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 608b180e-be5b-48f2-8819-1f7735643d1e
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message d7101536-fe3f-4b9c-ab44-60c2f642d6b6
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 5b83fb39-efc2-475d-97c1-3129fcc1d498
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 80578a8b-c45a-4238-b34f-0ef5d4561b07
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 766f8b6b-ac3a-465a-b011-1abc22eaf174
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message db817b3d-11af-4e23-b26e-608f3b165df4
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message ca1672e4-d4ad-40fa-803c-987ac38c0985
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message 2fbbde33-281f-4ca6-89c7-e0b5abbdff56
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: train message 76ab7596-a0ff-4eb9-a6a7-73d022fa53c4
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: evaluate message b5a527b8-146f-400b-8bc2-ba51fcddaef2
+[92mINFO [0m:      Sent reply
+[92mINFO [0m:      
+[92mINFO [0m:      Received: reconnect message 220c4684-35e7-4886-ad80-b7ae59fbda60
+[92mINFO [0m:      Disconnect and shut down
+[net_client 2] RUN_COMPLETE
